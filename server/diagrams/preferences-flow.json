@@ -1,0 +1,166 @@
+{
+  "schema": "diagram-studio/1",
+  "id": "preferences-flow",
+  "title": "Agent preferences: user preference to tool boundary",
+  "lede": "The user sets what their AI agent may do; a mock Protect evaluation names an AI agent at session start; the mock tool boundary enforces the preference on every agent tool call: permit, human approval (HITL) or deny. Mock only.",
+  "groups": {
+    "actor": {
+      "label": "Actors",
+      "color": "dark"
+    },
+    "idp": {
+      "label": "Protect (mock)",
+      "color": "blue"
+    },
+    "boundary": {
+      "label": "Tool boundary (mock)",
+      "color": "red"
+    },
+    "resource": {
+      "label": "Resources",
+      "color": "grey"
+    }
+  },
+  "nodes": [
+    {
+      "id": "agent",
+      "label": "AI agent",
+      "group": "actor",
+      "x": 0,
+      "y": 190
+    },
+    {
+      "id": "protect",
+      "label": "Protect: agent detection (mock)",
+      "group": "idp",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": "boundary",
+      "label": "Tool boundary gate",
+      "group": "boundary",
+      "x": 300,
+      "y": 330
+    },
+    {
+      "id": "prefs",
+      "label": "agentPreferences (user)",
+      "group": "boundary",
+      "x": 0,
+      "y": 500
+    },
+    {
+      "id": "hitl",
+      "label": "Human approval (HITL)",
+      "group": "actor",
+      "x": 300,
+      "y": 560
+    },
+    {
+      "id": "tool",
+      "label": "MCP tool",
+      "group": "resource",
+      "x": 600,
+      "y": 330
+    }
+  ],
+  "edges": [
+    {
+      "source": "agent",
+      "target": "protect",
+      "label": "signals at session start"
+    },
+    {
+      "source": "protect",
+      "target": "agent",
+      "label": "AI agent detected",
+      "dashed": true
+    },
+    {
+      "source": "agent",
+      "target": "boundary",
+      "label": "tools/call"
+    },
+    {
+      "source": "boundary",
+      "target": "prefs",
+      "label": "read agentPreferences"
+    },
+    {
+      "source": "prefs",
+      "target": "boundary",
+      "label": "permit / hitl / deny",
+      "dashed": true
+    },
+    {
+      "source": "boundary",
+      "target": "hitl",
+      "label": "428 taskId (hitl only)",
+      "dashed": true
+    },
+    {
+      "source": "hitl",
+      "target": "boundary",
+      "label": "approved / denied",
+      "dashed": true
+    },
+    {
+      "source": "boundary",
+      "target": "tool",
+      "label": "tool executes (permit only)"
+    }
+  ],
+  "steps": [
+    {
+      "title": "Session starts: signals to Protect",
+      "what": "The browser collects Signals once; mock Protect's bot detection names (or does not name) an AI agent.",
+      "edges": [
+        0
+      ]
+    },
+    {
+      "title": "Detection flags the session",
+      "what": "A detected rule (e.g. \"AI agent - Muse detected\") flags the session for every later agent call.",
+      "edges": [
+        1
+      ]
+    },
+    {
+      "title": "Agent calls a tool",
+      "what": "The agent calls the tool boundary with its delegated token.",
+      "edges": [
+        2
+      ]
+    },
+    {
+      "title": "Gate reads the preference",
+      "what": "The gate reads the user's agentPreferences: allowed tiers, spend cap, unknown-agent policy.",
+      "edges": [
+        3
+      ]
+    },
+    {
+      "title": "Gate decides",
+      "what": "Permit, HITL or deny: tier not allowed, amount over cap, or detection against the unknown-agent policy.",
+      "edges": [
+        4
+      ]
+    },
+    {
+      "title": "HITL: a human decides",
+      "what": "On hitl the call becomes a 428 challenge with a task id; the human approves or denies; approval lets the retry proceed.",
+      "edges": [
+        5,
+        6
+      ]
+    },
+    {
+      "title": "Permitted call executes",
+      "what": "Only a permitted call reaches the tool.",
+      "edges": [
+        7
+      ]
+    }
+  ]
+}

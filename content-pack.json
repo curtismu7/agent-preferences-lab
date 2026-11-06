@@ -1,0 +1,181 @@
+{
+  "schema": "demo-content-pack/1",
+  "id": "agent-preferences-lab",
+  "title": "Agent Preferences Lab",
+  "version": "0.1.0",
+  "demo": {
+    "id": "agent-preferences-lab",
+    "name": "Agent Preferences Lab",
+    "catalog": "D999",
+    "baseUrl": "http://localhost:7660",
+    "doctor": "/api/health",
+    "tags": [
+      "mcp",
+      "agent",
+      "preferences",
+      "protect",
+      "hitl",
+      "mock-only"
+    ]
+  },
+  "glossary": [
+    {
+      "id": "agent-preferences",
+      "term": "agentPreferences",
+      "definition": "The user's preference, stored as a JSON attribute on their directory user: allowedActions (action tiers), maxAmount (spend cap), detectAgent, unknownAgentPolicy (allow / hitl / deny for a detected AI agent).",
+      "aliases": [
+        "agent preferences"
+      ]
+    },
+    {
+      "id": "hitl",
+      "term": "HITL (human in the loop)",
+      "definition": "A blocked-but-approvable agent action is answered HTTP 428 with a task id; a human approves or denies. An approval is a single-use receipt: the retried call passes once.",
+      "aliases": [
+        "human approval",
+        "428"
+      ]
+    },
+    {
+      "id": "agent-detection",
+      "term": "Protect agent detection",
+      "definition": "PingOne Protect's bot detection names the AI agent type (rules 660-674, e.g. \"AI agent - Muse detected\") when the Signals SDK runs with agent identification. In AI-DEMO2 it is a session-start signal; per-call evaluation is an open question.",
+      "aliases": [
+        "bot detection",
+        "rules 660-674"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "rfc8693",
+      "title": "RFC 8693: OAuth 2.0 Token Exchange",
+      "url": "https://www.rfc-editor.org/rfc/rfc8693",
+      "kind": "standard",
+      "use": "Defines the act (actor) claim that marks a call as agent-originated.",
+      "status": "not-read",
+      "checked": "2026-11-06"
+    }
+  ],
+  "cards": [
+    {
+      "id": "try-allowed-read",
+      "label": "Scenario 1: Permitted: read tool, read allowed",
+      "description": "The tier is in the allowed list, no cap applies to reads, and nothing detected an agent: permit.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/#scenario-allowed-read"
+      },
+      "terms": [
+        "agent-preferences"
+      ],
+      "story": "S01"
+    },
+    {
+      "id": "try-write-blocked",
+      "label": "Scenario 2: HITL: write tool, user allows read only",
+      "description": "The tool needs the write tier; the user only allowed read. The call is not lost — it becomes a human-approval task (HTTP 428).",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/#scenario-write-blocked"
+      },
+      "terms": [
+        "hitl"
+      ],
+      "story": "S02"
+    },
+    {
+      "id": "try-over-cap",
+      "label": "Scenario 3: HITL: amount over the spend cap",
+      "description": "The tier is allowed but the amount (750) exceeds the 500 cap. The cap reason is what the human sees.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/#scenario-over-cap"
+      },
+      "terms": [
+        "hitl",
+        "agent-preferences"
+      ],
+      "story": "S03"
+    },
+    {
+      "id": "try-protect-hitl",
+      "label": "Scenario 4: HITL: Protect detects an AI agent",
+      "description": "Mock Protect named an AI agent at session start and the default policy is hitl: even an allowed read goes to a human first.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/#scenario-protect-hitl"
+      },
+      "terms": [
+        "agent-detection",
+        "hitl"
+      ],
+      "story": "S04"
+    },
+    {
+      "id": "try-protect-deny",
+      "label": "Scenario 5: Denied: Protect detection with a deny policy",
+      "description": "The user chose to deny detected agents outright: HTTP 403, no approval path. The strictest preference wins.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/#scenario-protect-deny"
+      },
+      "terms": [
+        "agent-detection"
+      ],
+      "story": "S05"
+    },
+    {
+      "id": "concept-editor",
+      "label": "Set your own preferences",
+      "description": "Edit allowed tiers, the spend cap and the unknown-agent policy; the gate answers on the next tool call.",
+      "group": "concept",
+      "action": {
+        "type": "route",
+        "href": "/#gate"
+      }
+    },
+    {
+      "id": "ref-doctor",
+      "label": "Doctor and health",
+      "description": "Preflight checks and the demo-health/1 endpoint.",
+      "group": "setup",
+      "action": {
+        "type": "route",
+        "href": "/api/health"
+      }
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "title": "Permitted: read tool, read allowed",
+      "say": "The tier is in the allowed list, no cap applies to reads, and nothing detected an agent: permit."
+    },
+    {
+      "id": "S02",
+      "title": "HITL: write tool, user allows read only",
+      "say": "The tool needs the write tier; the user only allowed read. The call is not lost — it becomes a human-approval task (HTTP 428)."
+    },
+    {
+      "id": "S03",
+      "title": "HITL: amount over the spend cap",
+      "say": "The tier is allowed but the amount (750) exceeds the 500 cap. The cap reason is what the human sees."
+    },
+    {
+      "id": "S04",
+      "title": "HITL: Protect detects an AI agent",
+      "say": "Mock Protect named an AI agent at session start and the default policy is hitl: even an allowed read goes to a human first."
+    },
+    {
+      "id": "S05",
+      "title": "Denied: Protect detection with a deny policy",
+      "say": "The user chose to deny detected agents outright: HTTP 403, no approval path. The strictest preference wins."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-preferences-lab
+  labels: { app: agent-preferences-lab }
+spec:
+  selector: { app: agent-preferences-lab }
+  ports:
+    - { name: http, port: 80, targetPort: http }
