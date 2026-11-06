@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     # Repo variable RUNS_ON (a JSON array, e.g. ["ubuntu-latest"]) overrides the self-hosted Mac default.
-    runs-on: ${{ fromJSON(vars.RUNS_ON || '["self-hosted","macOS"]') }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Node 26 only (owner decision 2026-10-31).
@@ -22,7 +22,7 @@ jobs:
       # A spare port in the range: the local container may hold 7660 on this runner.
       - run: PORT=7669 npm run doctor
   secrets:
-    runs-on: ${{ fromJSON(vars.RUNS_ON || '["self-hosted","macOS"]') }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
