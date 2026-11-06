@@ -256,3 +256,13 @@ test('rule 19: POST /api/mode switches (mock) and answers 409 when Real is not c
     assert.equal((await post({})).status, 400);
   });
 });
+
+test('GET /api/shelf answers the shelf URL (null when unconfigured)', async () => {
+  await withServer(async (url) => {
+    const res = await fetch(`${url}/api/shelf`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.deepEqual(Object.keys(body), ['shelfUrl']);
+    assert.equal(body.shelfUrl, null);
+  }, { env: {} });
+});

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import ShelfLink from "./components/ShelfLink";
 import PreferencesGate from "./components/PreferencesGate";
 import DiagramTab from "./components/DiagramTab";
 import TalkTrack from "./components/TalkTrack";
@@ -88,6 +89,7 @@ export default function App() {
             {!presenter && story && <p className="intro">{story.intro}</p>}
           </div>
           <div className="head__tools">
+            <ShelfLink />
             <span className="chip" data-testid="mode">Mode: {info ? info.mode : "mock"}{hosted === true ? " (hosted)" : hosted === false ? " (local)" : ""}</span>
             {!presenter && info && (
               <button

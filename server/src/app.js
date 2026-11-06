@@ -17,12 +17,13 @@ import {
 } from './preferences.js';
 import { buildHops, newTrace } from './trace.js';
 import { createWorkspaces, workspaceFrom } from './workspaces.js';
+import { shelfInfo } from './shelfLink.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIST = process.env.WEB_DIST || path.resolve(HERE, '../../web/dist');
 const CONFIG = process.env.CUSTOMER_CONFIG || path.resolve(HERE, '../../customer.config.json');
 
-export function createApp({ health = createHealth(), configFile = CONFIG, hosted = false, workspaces = createWorkspaces(), challenges = createChallengeStore() } = {}) {
+export function createApp({ health = createHealth(), configFile = CONFIG, hosted = false, workspaces = createWorkspaces(), challenges = createChallengeStore(), env = process.env } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.use(hostCheck);
@@ -32,6 +33,7 @@ export function createApp({ health = createHealth(), configFile = CONFIG, hosted
   const api = express.Router();
   api.use(express.json({ limit: '8kb' }));
   api.use('/health', health.router);
+  api.get('/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo(env)); });
   const castFor = (req) => loadCast(configFile, verticalFrom(req.query.vertical));
   // customer.config.json is read on every request so editing it shows up on reload.
   api.get('/scenarios', (req, res) => { res.set('Cache-Control', 'no-store'); res.json({ ...buildStory(castFor(req), { hosted }), verticals: Object.keys(VERTICALS), hosted }); });
