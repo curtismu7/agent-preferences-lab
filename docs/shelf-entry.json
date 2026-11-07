@@ -9,7 +9,7 @@
       "healthPath": "/api/health",
       "composeFile": "agent-preferences-lab/docker-compose.yml",
       "composeOverlays": [],
-      "notes": "Host-run: ./scripts/run.sh (port 7660). Mock only: no tenant, no credentials. Docker: HOST_PORT=7660 docker compose up --build -d (published on 127.0.0.1 only). The decision contract mirrors AI-DEMO2 PR #3401, enforced live 2026-11-06; per-call Protect evaluation is an open question. Repo: curtismu7/agent-preferences-lab (private). Catalog id pending owner assignment.",
+      "notes": "Host-run: ./scripts/run.sh (port 7660). Mock only: no tenant, no credentials. Docker: HOST_PORT=7660 docker compose up --build -d (published on 127.0.0.1 only). The decision contract mirrors AI-DEMO2 PR #3401, enforced live 2026-11-06; per-call Protect evaluation is an open question. Repo: curtismu7/agent-preferences-lab. Catalog id pending owner assignment.",
       "repo": "https://github.com/curtismu7/agent-preferences-lab",
       "where": "installed"
     }

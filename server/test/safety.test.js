@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isLoopbackHost, assertBindAllowed, bindHost, portProblem, resolvePort, isReservedHost, scanHosts, scanKeys, cleanText, hostCheck, sameOriginWrites } from '../src/safety.js';
+import { isLoopbackHost, assertBindAllowed, bindHost, portProblem, resolvePort, isReservedHost, scanHosts, scanKeys, cleanText, hostCheck, sameOriginWrites, allowedExtraHosts } from '../src/safety.js';
 
 test('loopback names', () => {
   for (const h of ['localhost', '127.0.0.1', '127.9.9.9', '::1', '[::1]']) assert.ok(isLoopbackHost(h), h);
@@ -92,4 +92,22 @@ test('review fixes: octets above 255 are not loopback; 4840 is reserved; control
   const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'pad-')), 'customer.config.json');
   fs.writeFileSync(f, JSON.stringify({ cast: { brand: 'Acme\u202eevil' } }));
   assert.ok(!/\u202e/.test(loadCast(f).castBrand));
+});
+
+test('LAB_ALLOWED_HOSTS: a named host passes hostCheck, any other still gets 403, a bad name throws', () => {
+  const saved = process.env.LAB_ALLOWED_HOSTS;
+  try {
+    process.env.LAB_ALLOWED_HOSTS = 'agent-preferences-lab.local.ping-devops.com, Other.Example';
+    assert.deepEqual([...allowedExtraHosts()], ['agent-preferences-lab.local.ping-devops.com', 'other.example']);
+    assert.ok(run(hostCheck, { headers: { host: 'agent-preferences-lab.local.ping-devops.com:7660' } }).next);
+    assert.equal(run(hostCheck, { headers: { host: 'evil.example.invalid:7660' } }).status, 403);
+    assert.throws(() => allowedExtraHosts({ LAB_ALLOWED_HOSTS: 'bad host!' }), /not a host name/);
+  } finally { if (saved === undefined) delete process.env.LAB_ALLOWED_HOSTS; else process.env.LAB_ALLOWED_HOSTS = saved; }
+  assert.equal(run(hostCheck, { headers: { host: 'agent-preferences-lab.local.ping-devops.com:7660' } }).status, 403, 'unset = loopback only');
+});
+
+test('sameOriginWrites behind the lab-proxy: the browser origin must match X-Forwarded-Host', () => {
+  const h = { host: 'agent-preferences-lab.local.ping-devops.com:7660', 'x-forwarded-host': 'local.ping-devops.com:8443' };
+  assert.ok(run(sameOriginWrites, { method: 'POST', headers: { ...h, origin: 'https://local.ping-devops.com:8443' } }).next);
+  assert.equal(run(sameOriginWrites, { method: 'POST', headers: { ...h, origin: 'https://evil.example.invalid' } }).status, 403);
 });

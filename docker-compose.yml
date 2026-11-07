@@ -11,6 +11,7 @@ services:
     environment:
       PORT: "7660"
       APLAB_BIND: 0.0.0.0
+      LAB_ALLOWED_HOSTS: ${LAB_ALLOWED_HOSTS:-agent-preferences-lab.local.ping-devops.com}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
