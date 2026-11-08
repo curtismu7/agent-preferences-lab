@@ -9,6 +9,7 @@ services:
     ports:
       - "127.0.0.1:${HOST_PORT:-7660}:7660"
     environment:
+      SHELF_URL: ${SHELF_URL:-http://127.0.0.1:4400}
       PORT: "7660"
       APLAB_BIND: 0.0.0.0
       LAB_ALLOWED_HOSTS: ${LAB_ALLOWED_HOSTS:-agent-preferences-lab.local.ping-devops.com}
