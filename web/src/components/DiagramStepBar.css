@@ -2,7 +2,9 @@
   to { stroke-dashoffset: -20; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .react-flow__edge path { animation: none !important; }
+  /* Specificity (0,3,1) beats the library's .react-flow__edge.animated path, so no important flag is needed. */
+  .react-flow .react-flow__edge path,
+  .react-flow .react-flow__edge.animated path { animation: none; }
 }
 
 /* DiagramStepBar.css — the card and caption under the shared DiagramControls toolbar. */
