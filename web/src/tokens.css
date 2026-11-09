@@ -1,4 +1,5 @@
-/* Theme tokens the diagram files read. Light by default, dark with the OS setting. No purple. */
+/* Theme tokens the diagram files read. Light by default, dark with the OS setting (main.jsx mirrors the OS setting
+   into data-theme, so this file needs no prefers-color-scheme query). No purple. */
 :root {
   --th-bg-page: #f6f7f9;
   --th-bg-card: #ffffff;
@@ -35,29 +36,49 @@
   --font-size-xl: 24px;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* Fixed diagram-control colours (the same in light and dark), named so the control CSS uses tokens only. */
+  --dc-ink: #263746;
+  --dc-ink-strong: #051727;
+  --dc-white: #ffffff;
+  --dc-grey-1: #e0e2e4;
+  --dc-grey-2: #cdd1d4;
+  --dc-grey-3: #909ea4;
+  --dc-grey-4: #5c646b;
+  --dc-paper: #f7f8f8;
+  --dc-inset: #eff0f1;
+  --dc-info: #12538d;
+  --dc-info-bg: #fcfcfc;
+  --dc-info-border: #bfdbfe;
+  --dc-warn: #92400e;
+  --dc-warn-bg: #fffbeb;
+  --dc-warn-border: #fde68a;
+  --dc-red: #d20e0f;
+  --dc-navy: #003366;
+  --dc-amber: #d97706;
+  --dc-green: #166534;
+  --dc-green-hover: #16a34a;
+  --dc-seq-ink: #020617;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --th-bg-page: #0b1220;
-    --th-bg-card: #131c2e;
-    --th-bg-inset: #1b2540;
-    --th-bg-hover: #1b2540;
-    --th-text: #ffffff;
-    --th-text-muted: #b6c2d2;
-    --th-border: #2a3550;
-    --th-border-strong: #34405e;
-    --th-status-info: #12538d;
-    --th-status-info-text: #93c5fd;
-    --th-status-info-bg: #16233c;
-    --th-status-warning: #f59e0b;
-    --th-status-warning-text: #fcd34d;
-    --th-status-warning-bg: #3a2a10;
-    --th-accent: #ef6b61;
-    --th-ok-text: #bbf7d0;
-    --th-ok-bg: #12301f;
-    --th-ok: #4ade80;
-    --th-deny-text: #fecaca;
-    --th-deny-bg: #3b1414;
-    --th-deny: #ef6b61;
-  }
+:root[data-theme="dark"] {
+  --th-bg-page: #0b1220;
+  --th-bg-card: #131c2e;
+  --th-bg-inset: #1b2540;
+  --th-bg-hover: #1b2540;
+  --th-text: #ffffff;
+  --th-text-muted: #b6c2d2;
+  --th-border: #2a3550;
+  --th-border-strong: #34405e;
+  --th-status-info: #12538d;
+  --th-status-info-text: #93c5fd;
+  --th-status-info-bg: #16233c;
+  --th-status-warning: #f59e0b;
+  --th-status-warning-text: #fcd34d;
+  --th-status-warning-bg: #3a2a10;
+  --th-accent: #ef6b61;
+  --th-ok-text: #bbf7d0;
+  --th-ok-bg: #12301f;
+  --th-ok: #4ade80;
+  --th-deny-text: #fecaca;
+  --th-deny-bg: #3b1414;
+  --th-deny: #ef6b61;
 }

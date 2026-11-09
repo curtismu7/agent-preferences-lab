@@ -1,6 +1,9 @@
-# Agent Preferences Lab
+# Agent Preferences LAB
 
-**Tier: Demo.** The user sets what their AI agent is allowed to do; a mock tool boundary enforces it. This is the standalone mock of the AI-DEMO2 `agentPreferences` feature (PR #3401, enforced live on that stack 2026-11-06) — same decision contract, no real tenant.
+Tier: Demo.
+Repo: https://github.com/curtismu7/agent-preferences-lab-LAB
+
+The user sets what their AI agent is allowed to do; a mock tool boundary enforces it. This is the standalone mock of the AI-DEMO2 `agentPreferences` feature (PR #3401, enforced live on that stack 2026-11-06) — same decision contract, no real tenant.
 
 1. **The preference.** The user (here: the visitor) sets allowed action tiers (read / write), an optional per-action spend cap, and what happens when Protect detects an AI agent: allow, human approval (HITL), or deny.
 2. **The mock Protect signal.** Once per session a mock Protect evaluation runs; bot detection names the agent type (rules 660-674, e.g. "AI agent - Muse detected"). The result flags the session for every later agent call. Whether every call needs its own evaluation is an open question — once per session shipped first.
@@ -26,6 +29,37 @@ or `npm ci && npm run doctor && npm start`. With Docker (OrbStack): `HOST_PORT=7
 | `npm run reset` | resets the default workspace's preferences, detection, challenges and runs on a running server |
 
 Port range 7660-7669 (default 7660). `GET /api/health` answers `demo-health/1`.
+
+## Run from a clone
+
+Prerequisites: Node 26 or newer. Docker (OrbStack) only if you use the Docker form. Mock needs no tenant, credentials or settings.
+
+```
+git clone https://github.com/curtismu7/agent-preferences-lab-LAB.git
+cd agent-preferences-lab-LAB
+npm ci
+npm run build
+npm run doctor
+npm start
+```
+
+Open http://127.0.0.1:7660/ (the server serves the built page). `GET /api/health` answers `demo-health/1`. Or with Docker: `HOST_PORT=7660 docker compose up --build -d` from the same folder.
+
+## Ports, and what to do if the port is taken
+
+```
+Ports: agent-preferences-lab-LAB listens on 7660 by default (allowed range 7660-7669).
+Docker publishes it on 127.0.0.1:7660 only.
+
+If the port is taken:
+1. Find what is using it:
+   lsof -iTCP:7660 -sTCP:LISTEN -n -P
+2. If it is an old copy of this lab (npm start), stop that process: kill <PID>.
+   If it is this lab's container: docker compose down (from this folder).
+3. If it is something else, stop it and free 7660. The server refuses ports outside
+   7660-7669 on purpose (npm run doctor says so).
+4. Then start again: npm start, or docker compose up -d.
+```
 
 ## API
 
