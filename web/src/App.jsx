@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import ShelfLink from "./components/ShelfLink";
 import PreferencesGate from "./components/PreferencesGate";
 import DiagramTab from "./components/DiagramTab";
 import TalkTrack from "./components/TalkTrack";
+import TopMenu, { applyFontSize } from "./top-menu/TopMenu";
 import { getJson, resetWorkspace, setMode } from "./api";
 
 export const TABS = [
@@ -16,6 +16,7 @@ const TAIL = "Nothing here calls a real gateway, identity provider or tenant.";
 export const BANNER_UNKNOWN = `SIMULATED / HOSTED SIMULATION: mock preferences, a mock Protect signal and a mock tool boundary. ${TAIL}`;
 const BANNER_LOCAL = `SIMULATED: mock preferences, a mock Protect signal and a mock tool boundary. ${TAIL}`;
 const BANNER_HOSTED = `HOSTED SIMULATION: mock preferences, a mock Protect signal and a mock tool boundary. ${TAIL}`;
+const THEMES = ["auto", "light", "dark"];
 
 const hashParts = () => {
   const h = window.location.hash.replace("#", "");
@@ -34,6 +35,8 @@ export default function App() {
   const [presenter, setPresenter] = useState(false);
   const [resetSignal, setResetSignal] = useState(0);
   const [resetMsg, setResetMsg] = useState("");
+  const [theme, setTheme] = useState(() => { try { const t = window.localStorage.getItem("aplab.theme"); return THEMES.includes(t) ? t : "auto"; } catch { return "auto"; } });
+  const [fontStep, setFontStep] = useState(() => { try { const f = window.localStorage.getItem("aplab.font"); return ["S", "M", "L"].includes(f) ? f : "M"; } catch { return "M"; } });
   const tabsRef = useRef(null);
 
   useEffect(() => { getJson("/api/info").then(setInfo, () => setInfo(null)); }, []);
@@ -64,6 +67,16 @@ export default function App() {
     return () => window.removeEventListener("keydown", on);
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "auto") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", theme);
+    try { window.localStorage.setItem("aplab.theme", theme); } catch { /* storage blocked */ }
+  }, [theme]);
+  useEffect(() => {
+    applyFontSize(fontStep);
+    try { window.localStorage.setItem("aplab.font", fontStep); } catch { /* storage blocked */ }
+  }, [fontStep]);
+
   const reset = useCallback(async () => {
     const ok = await resetWorkspace().catch(() => false);
     setResetSignal((n) => n + 1);
@@ -89,34 +102,22 @@ export default function App() {
             {!presenter && story && <p className="intro">{story.intro}</p>}
           </div>
           <div className="head__tools">
-            <ShelfLink />
-            <span className="chip" data-testid="mode">Mode: {info ? info.mode : "mock"}{hosted === true ? " (hosted)" : hosted === false ? " (local)" : ""}</span>
-            {!presenter && info && (
-              <button
-                type="button"
-                aria-pressed={info.mode === "real"}
-                data-testid="mode-real"
-                title={info.realAvailable ? "Switch between Mock and Real. Real is owner-run live PingOne." : "Real is not configured: set REAL_PINGONE_ENV_ID, REAL_PINGONE_WORKER_ID and REAL_PINGONE_WORKER_SECRET (owner-run). Mock keeps working."}
-                disabled={!info.realAvailable && info.mode !== "real"}
-                onClick={async () => {
-                  const target = info.mode === "real" ? "mock" : "real";
-                  const res = await setMode(target).catch(() => ({ ok: false }));
-                  if (res.ok) { window.location.reload(); }
-                  else setResetMsg(res.body?.detail || "Could not switch mode.");
-                }}
-              >
-                {info.mode === "real" ? "Real (press to switch to Mock)" : "Mock (press to switch to Real)"}
-              </button>
-            )}
-            {!presenter && (
-              <label className="inline">Vertical{" "}
-                <select value={vertical} onChange={(e) => setVertical(e.target.value)}>
-                  {(story ? story.verticals : ["retail"]).map((v) => <option key={v} value={v}>{v}</option>)}
-                </select>
-              </label>
-            )}
-            <button type="button" onClick={reset} data-testid="reset">Reset</button>
-            <button type="button" aria-pressed={presenter} onClick={() => setPresenter((v) => !v)} data-testid="presenter">{presenter ? "Exit presenter (Esc)" : "Presenter (P)"}</button>
+            <TopMenu
+              mode={{ value: info?.mode === "real" ? "real" : "mock", onChange: async (target) => {
+                if (info?.mode === target) return;
+                const res = await setMode(target).catch(() => ({ ok: false, body: {} }));
+                if (res.ok) { window.location.reload(); }
+                else setResetMsg(res.body?.detail || "Could not switch mode.");
+              }, realAvailable: info ? info.realAvailable : null, realHint: info?.realAvailable ? undefined : "Real is not configured: set REAL_PINGONE_ENV_ID, REAL_PINGONE_WORKER_ID and REAL_PINGONE_WORKER_SECRET (owner-run). Mock keeps working." }}
+              vertical={{ value: vertical, onChange: setVertical, options: story ? story.verticals : ["retail"] }}
+              theme={{ value: theme, onChange: setTheme }}
+              fontSize={{ value: fontStep, onChange: setFontStep }}
+              present={{ active: presenter, onToggle: () => setPresenter((v) => !v) }}
+              talkTrack={{ active: tab === "talk", onToggle: () => select("talk") }}
+              help={{ href: "https://github.com/curtismu7/agent-preferences-lab#readme" }}
+              version={info?.version || null}
+              onReset={reset}
+            />
           </div>
         </div>
       </header>

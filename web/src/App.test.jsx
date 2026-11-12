@@ -102,7 +102,7 @@ describe("shell", () => {
   it("shows the banner, the mode, and sends X-Workspace on API calls", async () => {
     await ready();
     expect(screen.getByTestId("banner")).toHaveTextContent(/^SIMULATED/);
-    expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock (local)");
+    expect(screen.getByTestId("mode-select")).toHaveValue("mock");
     const ev = calls.find((c) => c.url === "/api/mcp/tool");
     expect(ev.opts.headers["x-workspace"]).toMatch(/^[a-z0-9-]{1,40}$/);
   });
@@ -177,7 +177,7 @@ describe("talk track and presenter mode", () => {
   it("lists the talk track; presenter mode keeps the banner and shows the say-text; Esc leaves", async () => {
     await ready();
     await userEvent.click(screen.getByRole("tab", { name: "Talk track" }));
-    expect(screen.getByTestId("talk-track")).toHaveTextContent("Everything is simulated.");
+    expect(screen.getByTestId("talk-track-list")).toHaveTextContent("Everything is simulated.");
     await userEvent.click(screen.getByRole("tab", { name: "Preference gate" }));
     await userEvent.keyboard("p");
     expect(await screen.findByTestId("presenter-say")).toHaveTextContent("The user sets what their agent may do.");
@@ -189,7 +189,7 @@ describe("talk track and presenter mode", () => {
   it("the hosted build says HOSTED SIMULATION in the banner", async () => {
     const orig = STORY.banner;
     STORY.banner = "HOSTED SIMULATION: x"; STORY.hosted = true;
-    try { render(<App />); await waitFor(() => expect(screen.getByTestId("banner")).toHaveTextContent(/^HOSTED SIMULATION/)); expect(screen.getByTestId("mode")).toHaveTextContent("(hosted)"); }
+    try { render(<App />); await waitFor(() => expect(screen.getByTestId("banner")).toHaveTextContent(/^HOSTED SIMULATION/)); }
     finally { STORY.banner = orig; STORY.hosted = false; }
   });
 });
